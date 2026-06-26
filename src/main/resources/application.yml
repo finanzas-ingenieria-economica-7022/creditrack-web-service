@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+app:
+  datasource:
+    iam:
+      jdbc-url: jdbc:h2:mem:iamdb;DB_CLOSE_DELAY=-1;NON_KEYWORDS=KEY,VALUE
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    catalog:
+      jdbc-url: jdbc:h2:mem:catalogdb;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    simulation:
+      jdbc-url: jdbc:h2:mem:simulationdb;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    analytics:
+      jdbc-url: jdbc:h2:mem:analyticsdb;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+jwt:
+  secret: 9a4f2c8d3b7a1e5f8c3d6e9f2a5b8c1d4e7f0a3b6c9d2e5f8a1b4c7d0e3f6a9b  # 256-bit strong key
+  expiration: 86400000 # 24 hours in milliseconds
