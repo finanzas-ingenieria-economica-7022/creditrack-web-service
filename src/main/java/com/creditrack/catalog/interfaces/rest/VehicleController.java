@@ -2,6 +2,7 @@ package com.creditrack.catalog.interfaces.rest;
 
 import com.creditrack.catalog.domain.model.Vehicle;
 import com.creditrack.catalog.domain.repositories.VehicleRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicles")
+@Tag(name = "4. Vehicle Catalog", description = "CRUD operations for vehicle inventory")
 public class VehicleController {
 
     private final VehicleRepository repository;

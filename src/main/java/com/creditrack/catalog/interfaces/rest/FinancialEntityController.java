@@ -2,6 +2,7 @@ package com.creditrack.catalog.interfaces.rest;
 
 import com.creditrack.catalog.domain.model.FinancialEntity;
 import com.creditrack.catalog.domain.repositories.FinancialEntityRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/financial-entities")
+@Tag(name = "5. Financial Institutions", description = "CRUD operations for banks and default interest rates")
 public class FinancialEntityController {
 
     private final FinancialEntityRepository repository;

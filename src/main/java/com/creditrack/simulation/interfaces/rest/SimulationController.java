@@ -8,6 +8,7 @@ import com.creditrack.simulation.domain.model.SimulationResult;
 import com.creditrack.simulation.domain.repositories.SimulationRepository;
 import com.creditrack.simulation.interfaces.rest.dto.SimulationRequest;
 import com.creditrack.simulation.interfaces.rest.dto.SimulationResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/simulations")
+@Tag(name = "6. Simulation Engine", description = "Run parallel credit simulations and retrieve amortization schedules")
 public class SimulationController {
 
     private final SimulationRepository repository;
