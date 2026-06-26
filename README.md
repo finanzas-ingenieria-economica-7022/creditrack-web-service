@@ -1,6 +1,6 @@
 # CrediTrack Web-Service
 
-This project is the backend web-service and REST API for CrediTrack, a vehicle credit simulation platform (Compra Inteligente). The application is built using Java 21, Spring Boot 3.3.0, Spring Security, JWT (JSON Web Tokens), and Hibernate/JPA.
+This project is the backend web-service and REST API for CrediTrack, a vehicle credit simulation platform (Compra Inteligente). The application is built using Java 21, Spring Boot 3.3.0, Spring Security, JWT (JSON Web Tokens), and Hibernate/JPA connected to a local MySQL instance.
 
 ---
 
@@ -15,15 +15,13 @@ The system utilizes a modular monolith approach based on Domain-Driven Design (D
 
 ---
 
-## Database Isolation
+## Database Consolidation (MySQL)
 
-To enforce Bounded Context boundaries and prevent shared database coupling, each context connects to its own independent in-memory H2 database. There is no cross-database join or direct database access between contexts:
-* **IAM Database**: `jdbc:h2:mem:iamdb`
-* **Catalog Database**: `jdbc:h2:mem:catalogdb`
-* **Simulation Database**: `jdbc:h2:mem:simulationdb`
-* **Analytics Database**: `jdbc:h2:mem:analyticsdb`
+To simplify local administration, all Bounded Contexts are consolidated into a single database named `creditrack_db` on your local MySQL server.
+By using `createDatabaseIfNotExist=true` in our JDBC URLs, the database will be created automatically in your MySQL Workbench upon starting the service:
+* **Database URL**: `jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true`
 
-Each database is configured with its own dedicated Connection Pool (HikariCP), LocalContainerEntityManagerFactoryBean, and PlatformTransactionManager in their respective infrastructure package configurations.
+The tables from all contexts will reside in this database, while maintaining the package and transaction boundaries at the code level. Each context still uses its own dedicated connection pool (HikariCP), LocalContainerEntityManagerFactoryBean, and PlatformTransactionManager in their respective infrastructure configs.
 
 ---
 
@@ -52,8 +50,9 @@ The simulation engine replicates the exact calculations modeled in the Interbank
 ## Step-by-Step Execution Guide
 
 ### Prerequisite Checklist
-* Java SDK 21 installed (for instance, JetBrains JBR or OpenJDK 21).
+* Java SDK 21 installed.
 * IntelliJ IDEA (Community or Ultimate).
+* Local MySQL server running on port `3306` with user `root` and password `12345` (standard local settings).
 * Maven Wrapper files (`mvnw` and `mvnw.cmd`) included in the project directory.
 
 ### Running inside IntelliJ IDEA (GUI Method)
@@ -61,9 +60,9 @@ The simulation engine replicates the exact calculations modeled in the Interbank
 To run the application using IntelliJ GUI Maven plugins:
 1. Open the project folder in IntelliJ IDEA.
 2. Open the **Maven** tool window (usually on the right sidebar. If missing, go to `View -> Tool Windows -> Maven`).
-3. Click the **Reload All Maven Projects** icon (the circular arrows) at the top-left of the Maven tool window. This downloads the Lombok version 1.18.34 and other dependencies.
+3. Click the **Reload All Maven Projects** icon (the circular arrows) at the top-left of the Maven tool window. This downloads the Lombok version 1.18.34, MySQL connector, and other dependencies.
 4. Expand `creditrack-web-service` -> **Plugins** -> **spring-boot**.
-5. Double-click **`spring-boot:run`**. The application will start on port `8080`.
+5. Double-click **`spring-boot:run`**. The application will start on port `8080` and automatically create the 4 databases inside your MySQL Workbench.
 
 ### Running with the IntelliJ IDE Run Button (Direct Java Execution)
 
@@ -96,3 +95,24 @@ Once the application is running, you can test all endpoints in your browser:
    * Run a simulation using `POST /api/simulations` passing the configured IDs and grace periods. Check the returned cronograma and indicators (TCEA, TIR, VAN).
 6. **Inspect Dashboard Metrics**:
    * Fetch aggregate data in `GET /api/analytics/dashboard` to verify metrics update automatically.
+
+---
+
+## Test Suite and H2 Fallback Profile
+
+To run tests without requiring a local running MySQL database, the project includes an active test profile:
+* **Active Profile**: `test` (configured in `src/test/resources/application-test.yml`)
+* **Test Database URL**: In-memory H2 databases (such as `jdbc:h2:mem:iamdb_test`, etc.) configured dynamically for each Bounded Context.
+* **Execution**: To run the entire test suite, execute the following command in the project directory:
+  ```bash
+  ./mvnw.cmd clean test
+  ```
+
+---
+
+## Swagger UI Refinement and Custom Configuration
+
+The OpenAPI / Swagger documentation has been customized for a professional look and ease of use:
+* **Global JWT Authorization**: Added a global JWT Bearer Security Scheme through `OpenApiConfig`. Clicking the "Authorize" button allows authentication across all secured endpoints.
+* **Clean Tagging**: Section names in the Swagger UI have been cleaned of the "Controller" suffix and reorganized with numbered prefixes for logical flow (e.g., `1. Authentication`, `2. Profiles`, `3. Customers`, `4. Vehicles`, `5. Financial Entities`, `6. Simulations`, `7. Analytics Dashboard`).
+

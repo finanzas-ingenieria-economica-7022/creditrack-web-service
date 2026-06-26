@@ -8,6 +8,7 @@ import com.creditrack.iam.infrastructure.security.JwtTokenProvider;
 import com.creditrack.iam.interfaces.rest.dto.LoginRequest;
 import com.creditrack.iam.interfaces.rest.dto.LoginResponse;
 import com.creditrack.iam.interfaces.rest.dto.RegisterRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "1. Authentication", description = "User registration and authentication endpoints")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
