@@ -1,0 +1,25 @@
+app:
+  datasource:
+    iam:
+      jdbc-url: jdbc:h2:mem:iamdb_test;DB_CLOSE_DELAY=-1;NON_KEYWORDS=KEY,VALUE
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    catalog:
+      jdbc-url: jdbc:h2:mem:catalogdb_test;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    simulation:
+      jdbc-url: jdbc:h2:mem:simulationdb_test;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+    analytics:
+      jdbc-url: jdbc:h2:mem:analyticsdb_test;DB_CLOSE_DELAY=-1
+      username: sa
+      password:
+      driver-class-name: org.h2.Driver
+  jpa:
+    dialect: org.hibernate.dialect.H2Dialect
+    ddl-auto: create-drop

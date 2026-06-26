@@ -1,6 +1,7 @@
 package com.creditrack.catalog.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,12 @@ import java.util.HashMap;
 )
 public class CatalogDbConfig {
 
+    @Value("${app.jpa.dialect}")
+    private String dialect;
+
+    @Value("${app.jpa.ddl-auto}")
+    private String ddlAuto;
+
     @Bean(name = "catalogDataSource")
     @ConfigurationProperties(prefix = "app.datasource.catalog")
     public DataSource dataSource() {
@@ -41,8 +48,8 @@ public class CatalogDbConfig {
         em.setJpaVendorAdapter(vendorAdapter);
 
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "update");
-        properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        properties.put("hibernate.hbm2ddl.auto", ddlAuto);
+        properties.put("hibernate.dialect", dialect);
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.format_sql", "true");
         em.setJpaPropertyMap(properties);

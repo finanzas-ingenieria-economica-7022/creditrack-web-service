@@ -5,6 +5,7 @@ import com.creditrack.iam.domain.model.User;
 import com.creditrack.iam.domain.repositories.ProfileRepository;
 import com.creditrack.iam.domain.repositories.UserRepository;
 import com.creditrack.iam.interfaces.rest.dto.ProfileResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/profiles")
+@Tag(name = "2. User Profiles", description = "Authenticate and retrieve user profile details")
 public class ProfileController {
 
     private final UserRepository userRepository;

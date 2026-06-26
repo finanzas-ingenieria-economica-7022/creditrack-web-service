@@ -2,6 +2,7 @@ package com.creditrack.catalog.interfaces.rest;
 
 import com.creditrack.catalog.domain.model.Customer;
 import com.creditrack.catalog.domain.repositories.CustomerRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
+@Tag(name = "3. Customer Catalog", description = "CRUD operations for customer records")
 public class CustomerController {
 
     private final CustomerRepository repository;
