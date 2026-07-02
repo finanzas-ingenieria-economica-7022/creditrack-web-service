@@ -1,5 +1,8 @@
 package com.creditrack.iam.infrastructure.security;
 
+import com.creditrack.iam.domain.model.User;
+import com.creditrack.iam.domain.repositories.TokenBlacklistRepository;
+import com.creditrack.iam.domain.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,10 +22,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserRepository userRepository;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService customUserDetailsService) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider,
+                                   CustomUserDetailsService customUserDetailsService,
+                                   UserRepository userRepository,
+                                   TokenBlacklistRepository tokenBlacklistRepository) {
         this.tokenProvider = tokenProvider;
         this.customUserDetailsService = customUserDetailsService;
+        this.userRepository = userRepository;
+        this.tokenBlacklistRepository = tokenBlacklistRepository;
     }
 
     @Override
@@ -32,7 +42,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+                String jti = tokenProvider.getJtiFromJWT(jwt);
+                if (StringUtils.hasText(jti) && tokenBlacklistRepository.existsByJtiAndExpiresAtAfter(jti, java.time.LocalDateTime.now())) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 String username = tokenProvider.getUsernameFromJWT(jwt);
+                int tokenVersion = tokenProvider.getTokenVersionFromJWT(jwt);
+
+                User user = userRepository.findByUsername(username).orElse(null);
+                if (user == null || !Boolean.TRUE.equals(user.getEnabled())) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                int currentTokenVersion = user.getTokenVersion() == null ? 0 : user.getTokenVersion();
+                if (currentTokenVersion != tokenVersion) {
+                    SecurityContextHolder.clearContext();
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
