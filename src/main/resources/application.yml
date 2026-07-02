@@ -4,22 +4,22 @@ server:
 app:
   datasource:
     iam:
-      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       username: root
       password: "12345"
       driver-class-name: com.mysql.cj.jdbc.Driver
     catalog:
-      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       username: root
       password: "12345"
       driver-class-name: com.mysql.cj.jdbc.Driver
     simulation:
-      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       username: root
       password: "12345"
       driver-class-name: com.mysql.cj.jdbc.Driver
     analytics:
-      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      jdbc-url: jdbc:mysql://localhost:3306/creditrack_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       username: root
       password: "12345"
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -37,3 +37,5 @@ spring:
 jwt:
   secret: 9a4f2c8d3b7a1e5f8c3d6e9f2a5b8c1d4e7f0a3b6c9d2e5f8a1b4c7d0e3f6a9b  # 256-bit strong key
   expiration: 86400000 # 24 hours in milliseconds
+  refresh-expiration: 604800000 # 7 days in milliseconds
+  reset-expiration: 900000 # 15 minutes in milliseconds
