@@ -27,4 +27,20 @@ public class User {
 
     @Column(nullable = false)
     private String role;
+
+    @Column(nullable = false)
+    private Boolean enabled = true;
+
+    @Column(name = "token_version", nullable = false)
+    private Integer tokenVersion = 0;
+
+    @PrePersist
+    void prePersist() {
+        if (enabled == null) {
+            enabled = true;
+        }
+        if (tokenVersion == null) {
+            tokenVersion = 0;
+        }
+    }
 }
