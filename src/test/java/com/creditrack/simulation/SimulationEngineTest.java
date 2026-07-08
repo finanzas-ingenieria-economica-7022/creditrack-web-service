@@ -17,7 +17,6 @@ public class SimulationEngineTest {
 
     @Test
     public void testReplicateExcelFrenchModel() {
-        // --- 1. SET UP EXCEL INPUT VALUES ---
         Simulation sim = new Simulation();
         sim.setName("Simulacion Test Compra Inteligente");
         sim.setVehiclePrice(16000.0); // PV = 16000
@@ -45,7 +44,6 @@ public class SimulationEngineTest {
         sim.setRiskInsuranceRate(0.003); // pSegRie = 0.3%
         sim.setCokRate(0.50); // COK = 50%
 
-        // Grace periods configuration: 3 Total, 3 Partial, 30 Sin Gracia (Total = 36 months)
         List<String> gracePeriods = new ArrayList<>();
         for (int i = 0; i < 3; i++) gracePeriods.add("T"); // Months 1, 2, 3: Total
         for (int i = 0; i < 3; i++) gracePeriods.add("P"); // Months 4, 5, 6: Partial
