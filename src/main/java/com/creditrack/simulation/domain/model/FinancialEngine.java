@@ -38,23 +38,27 @@ public class FinancialEngine {
         BigDecimal cokMonthlyRate = effectiveMonthlyRate(cokTea);
         BigDecimal principal = input.vehiclePrice().multiply(
             BigDecimal.ONE.subtract(input.downPaymentPercent().divide(HUNDRED, MC)), MC);
-        BigDecimal balloon = input.vehiclePrice().multiply(input.balloonPercent().divide(HUNDRED, MC), MC);
+        // FIX 1: Balloon se calcula sobre el MONTO A FINANCIAR (principal), no sobre el precio total
+        BigDecimal balloon = principal.multiply(input.balloonPercent().divide(HUNDRED, MC), MC);
         BigDecimal lifeRate = input.creditLifeInsuranceMonthlyPercent().divide(HUNDRED, MC);
         BigDecimal vehicleInsuranceMonthlyPercent = input.vehicleInsuranceAnnualPercent()
             .divide(TWELVE, 4, RoundingMode.HALF_UP);
+        // Seguro vehicular: sobre precio del vehiculo (constante todo el plazo, segun Excel)
         BigDecimal vehicleInsurance = input.vehiclePrice()
             .multiply(vehicleInsuranceMonthlyPercent.divide(HUNDRED, MC), MC);
-        BigDecimal creditLifeInsurance = principal.multiply(lifeRate, MC);
         BigDecimal fee = BigDecimal.ZERO;
-
+        // Desgravamen: tasa mensual aplicada sobre el PRINCIPAL ORIGINAL (constante en todo el plazo).
+        // El Excel muestra columna G fija = principal * pct en cada periodo sin importar amortizacion.
+        BigDecimal creditLifeInsurance = principal.multiply(lifeRate, MC);
         BigDecimal balanceAfterGrace = principal;
         for (int period = 1; period <= input.graceMonths(); period++) {
             BigDecimal interest = balanceAfterGrace.multiply(monthlyRate, MC);
             if (input.graceType() == GraceType.TOTAL) {
-                balanceAfterGrace = balanceAfterGrace.add(interest).add(creditLifeInsurance).add(vehicleInsurance);
-            } else if (input.graceType() == GraceType.PARTIAL) {
-                balanceAfterGrace = balanceAfterGrace.add(creditLifeInsurance).add(vehicleInsurance);
+                // Gracia Total: capitaliza interes Y seguros (ambos constantes sobre el principal original)
+                BigDecimal lifeInGrace = creditLifeInsurance;
+                balanceAfterGrace = balanceAfterGrace.add(interest).add(lifeInGrace).add(vehicleInsurance);
             }
+            // Gracia Parcial: paga intereses y seguros, saldo NO crece
         }
 
         int regularPeriods = input.termMonths() - input.graceMonths();
@@ -80,6 +84,7 @@ public class FinancialEngine {
             BigDecimal initial = balance;
             BigDecimal interest = initial.multiply(monthlyRate, MC);
             totalInterestAccrued = totalInterestAccrued.add(interest);
+            // FIX 3 REVERTIDO: desgravamen es constante (sobre principal original, igual que Excel)
             BigDecimal life = creditLifeInsurance;
             totalInsuranceAccrued = totalInsuranceAccrued.add(life).add(vehicleInsurance);
             BigDecimal amortization = BigDecimal.ZERO;
@@ -89,14 +94,14 @@ public class FinancialEngine {
             BigDecimal paidVehicleInsurance = vehicleInsurance;
 
             if (period <= input.graceMonths() && input.graceType() == GraceType.TOTAL) {
+                // Gracia Total: capitaliza todo, cliente no paga nada este mes
                 balance = balance.add(interest).add(life).add(vehicleInsurance);
                 paidLife = BigDecimal.ZERO;
                 paidVehicleInsurance = BigDecimal.ZERO;
             } else if (period <= input.graceMonths() && input.graceType() == GraceType.PARTIAL) {
+                // Gracia Parcial: cliente paga solo interes + seguros, saldo queda igual
                 basePayment = interest;
-                balance = balance.add(life).add(vehicleInsurance);
-                paidLife = BigDecimal.ZERO;
-                paidVehicleInsurance = BigDecimal.ZERO;
+                // Saldo NO cambia (no se acumulan seguros al principal)
             } else {
                 BigDecimal scheduledAmortization = installment.subtract(interest);
                 boolean last = period == input.termMonths();
@@ -118,6 +123,7 @@ public class FinancialEngine {
 
             BigDecimal total = basePayment.add(paidLife).add(paidVehicleInsurance).add(balloonPayment);
             totalPaymentAccrued = totalPaymentAccrued.add(total);
+            // FIX 4: TIR y VAN usan el mismo flujo total del cliente (cuota completa con seguros)
             cashflows.add(total.negate());
             BigDecimal baseFlow = baseCashflow(period, input, interest, installment, balloon).negate();
             baseCashflows.add(baseFlow);
@@ -134,7 +140,8 @@ public class FinancialEngine {
         if (balance.abs().compareTo(CENT) > 0) {
             throw new IllegalStateException("El saldo final no es cero: " + money(balance));
         }
-        BigDecimal monthlyIrr = irr(baseCashflows);
+        // FIX 4: TIR se calcula con flujo TOTAL (incluye seguros) — igual que el Excel
+        BigDecimal monthlyIrr = irr(cashflows);
         BigDecimal annualIrr = BigDecimal.ONE.add(monthlyIrr).pow(12, MC).subtract(BigDecimal.ONE);
         BigDecimal totalFees = sum(schedule, PaymentRow::getCommission);
 
@@ -147,7 +154,8 @@ public class FinancialEngine {
         result.setCokTemPercent(ratePercent(cokMonthlyRate.multiply(HUNDRED)));
         result.setTir(ratePercent(monthlyIrr.multiply(HUNDRED)));
         result.setTcea(ratePercent(annualIrr.multiply(HUNDRED)));
-        result.setVan(money(npv(baseCashflows, cokMonthlyRate)));
+        // FIX 4: VAN tambien usa flujo TOTAL del cliente (igual que Excel)
+        result.setVan(money(npv(cashflows, cokMonthlyRate)));
         result.setFinancedAmount(money(principal));
         result.setTotalInterest(money(totalInterestAccrued));
         result.setTotalInsurance(money(totalInsuranceAccrued));
