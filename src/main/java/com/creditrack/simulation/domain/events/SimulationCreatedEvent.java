@@ -10,7 +10,8 @@ public class SimulationCreatedEvent {
     private final Long vehicleId;
     private final Long financialEntityId;
 
-    public SimulationCreatedEvent(Long simulationId, Double loanAmount, Double tcea, Long vehicleId, Long financialEntityId) {
+    public SimulationCreatedEvent(Long simulationId, Double loanAmount, Double tcea,
+                                  Long vehicleId, Long financialEntityId) {
         this.simulationId = simulationId;
         this.loanAmount = loanAmount;
         this.tcea = tcea;
