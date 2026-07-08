@@ -212,6 +212,7 @@ public class SimulationService {
         r.setTermMonths(e.getTermMonths()); r.setFirstPaymentDate(e.getFirstPaymentDate());
         r.setPaymentDay(e.getPaymentDay()); r.setGraceType(e.getGraceType());
         r.setGraceMonths(e.getGraceMonths()); r.setBalloonPercent(e.getBalloonPercent());
+        r.setBalloonAmount(e.getBalloonAmount());
         r.setCreditLifeInsuranceMonthlyPercent(e.getCreditLifeInsuranceMonthlyPercent());
         r.setVehicleInsuranceAnnualPercent(e.getVehicleInsuranceAnnualPercent());
         r.setMonthlyPayment(e.getMonthlyPayment()); r.setTeaPercent(e.getTeaPercent());

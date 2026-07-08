@@ -24,6 +24,7 @@ public class SimulationResponse {
     private String graceType;
     private Integer graceMonths;
     private BigDecimal balloonPercent;
+    private BigDecimal balloonAmount;
     private BigDecimal creditLifeInsuranceMonthlyPercent;
     private BigDecimal vehicleInsuranceAnnualPercent;
     private BigDecimal monthlyPayment;
