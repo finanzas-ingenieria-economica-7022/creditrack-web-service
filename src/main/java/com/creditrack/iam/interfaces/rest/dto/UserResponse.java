@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProfileResponse {
+public class UserResponse {
     private Long userId;
     private String username;
     private String email;
     private String role;
     private Boolean enabled;
+    private Integer tokenVersion;
+    private Long profileId;
     private String firstName;
     private String lastName;
     private String documentType;

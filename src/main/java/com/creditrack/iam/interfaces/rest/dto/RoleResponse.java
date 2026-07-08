@@ -5,21 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private String accessToken;
-    private String refreshToken;
-    private String tokenType;
-    private Long userId;
-    private String username;
-    private String email;
+public class RoleResponse {
     private String role;
-    private LocalDateTime expiresAt;
     private List<String> permissions;
 }

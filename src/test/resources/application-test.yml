@@ -23,3 +23,9 @@ app:
   jpa:
     dialect: org.hibernate.dialect.H2Dialect
     ddl-auto: create-drop
+
+jwt:
+  secret: 9a4f2c8d3b7a1e5f8c3d6e9f2a5b8c1d4e7f0a3b6c9d2e5f8a1b4c7d0e3f6a9b
+  expiration: 86400000
+  refresh-expiration: 604800000
+  reset-expiration: 900000

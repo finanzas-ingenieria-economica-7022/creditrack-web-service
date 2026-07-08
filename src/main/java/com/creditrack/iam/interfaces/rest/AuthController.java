@@ -1,88 +1,81 @@
 package com.creditrack.iam.interfaces.rest;
 
-import com.creditrack.iam.domain.model.Profile;
-import com.creditrack.iam.domain.model.User;
-import com.creditrack.iam.domain.repositories.ProfileRepository;
-import com.creditrack.iam.domain.repositories.UserRepository;
-import com.creditrack.iam.infrastructure.security.JwtTokenProvider;
+import com.creditrack.iam.application.service.AuthService;
+import com.creditrack.iam.interfaces.rest.dto.ChangePasswordRequest;
+import com.creditrack.iam.interfaces.rest.dto.ForgotPasswordRequest;
+import com.creditrack.iam.interfaces.rest.dto.ForgotPasswordResponse;
 import com.creditrack.iam.interfaces.rest.dto.LoginRequest;
 import com.creditrack.iam.interfaces.rest.dto.LoginResponse;
+import com.creditrack.iam.interfaces.rest.dto.LogoutRequest;
+import com.creditrack.iam.interfaces.rest.dto.RefreshTokenRequest;
 import com.creditrack.iam.interfaces.rest.dto.RegisterRequest;
+import com.creditrack.iam.interfaces.rest.dto.ResetPasswordRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "1. Authentication", description = "User registration and authentication endpoints")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final ProfileRepository profileRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          UserRepository userRepository,
-                          ProfileRepository profileRepository,
-                          PasswordEncoder passwordEncoder,
-                          JwtTokenProvider tokenProvider) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.profileRepository = profileRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenProvider = tokenProvider;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-
-        // Create user
-        User user = new User(
-                null,
-                registerRequest.getUsername(),
-                passwordEncoder.encode(registerRequest.getPassword()),
-                registerRequest.getEmail(),
-                "ROLE_USER"
-        );
-        User savedUser = userRepository.save(user);
-
-        // Create profile
-        Profile profile = new Profile(
-                null,
-                registerRequest.getFirstName(),
-                registerRequest.getLastName(),
-                registerRequest.getDocumentType(),
-                registerRequest.getDocumentNumber(),
-                registerRequest.getPhoneNumber(),
-                savedUser.getId()
-        );
-        profileRepository.save(profile);
-
-        return ResponseEntity.ok("User registered successfully!");
+    public ResponseEntity<LoginResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.register(registerRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+    public ResponseEntity<LoginResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(authService.login(loginRequest));
+    }
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = tokenProvider.generateToken(authentication);
+    @PostMapping("/refresh-token")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
+    }
 
-        return ResponseEntity.ok(new LoginResponse(jwt, "Bearer", loginRequest.getUsername()));
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+                                       @RequestBody(required = false) LogoutRequest request) {
+        authService.logout(authorizationHeader, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout-all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> logoutAll(Authentication authentication,
+                                          @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        authService.logoutAll(authentication.getName(), authorizationHeader);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(authService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/change-password")
+    @PreAuthorize("hasAuthority('password:change')")
+    public ResponseEntity<Void> changePassword(Authentication authentication, @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(authentication.getName(), request);
+        return ResponseEntity.noContent().build();
     }
 }
