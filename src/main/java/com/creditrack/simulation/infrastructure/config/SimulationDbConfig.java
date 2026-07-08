@@ -21,7 +21,10 @@ import java.util.HashMap;
 @EnableJpaRepositories(
     entityManagerFactoryRef = "simulationEntityManagerFactory",
     transactionManagerRef = "simulationTransactionManager",
-    basePackages = { "com.creditrack.simulation.domain.repositories" }
+    basePackages = {
+        "com.creditrack.simulation.domain.repositories",
+        "com.creditrack.simulation.application"
+    }
 )
 public class SimulationDbConfig {
 

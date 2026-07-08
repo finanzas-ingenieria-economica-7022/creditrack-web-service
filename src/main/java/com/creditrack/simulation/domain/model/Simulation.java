@@ -1,93 +1,28 @@
 package com.creditrack.simulation.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
+@Data
 @Entity
 @Table(name = "simulations")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Simulation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(length = 40)
+    private String code;
 
-    @Column(name = "vehicle_price", nullable = false)
-    private Double vehiclePrice; // PV
+    @Column(name = "owner_user_id")
+    private Long ownerUserId;
 
-    @Column(name = "initial_payment_percentage", nullable = false)
-    private Double initialPaymentPercentage; // pCI
-
-    @Column(name = "final_payment_percentage", nullable = false)
-    private Double finalPaymentPercentage; // pCF
-
-    @Column(name = "term_months", nullable = false)
-    private Integer termMonths; // N
-
-    @Column(name = "interest_rate", nullable = false)
-    private Double interestRate; // Tasa
-
-    @Column(name = "interest_rate_type", nullable = false)
-    private String interestRateType; // tpTasa (TNA or TEA)
-
-    @Column(name = "capitalization_type", nullable = false)
-    private String capitalizationType; // pc (Diaria, Mensual)
-
-    @Column(name = "payment_frequency", nullable = false)
-    private Integer paymentFrequency; // frec (30)
-
-    @Column(name = "days_per_year", nullable = false)
-    private Integer daysPerYear; // NDxA (360)
-
-    // Initial Costs (capitalized in loan)
-    @Column(name = "notary_cost")
-    private Double notaryCost;
-
-    @Column(name = "registration_cost")
-    private Double registrationCost;
-
-    @Column(name = "appraisal_cost")
-    private Double appraisalCost;
-
-    @Column(name = "study_commission")
-    private Double studyCommission;
-
-    @Column(name = "activation_commission")
-    private Double activationCommission;
-
-    // Periodic Costs
-    @Column(name = "gps_fee")
-    private Double gpsFee;
-
-    @Column(name = "portes_fee")
-    private Double portesFee;
-
-    @Column(name = "admin_fee")
-    private Double adminFee;
-
-    @Column(name = "desgravamen_rate")
-    private Double desgravamenRate; // pSegDes
-
-    @Column(name = "risk_insurance_rate")
-    private Double riskInsuranceRate; // pSegRie
-
-    @Column(name = "cok_rate")
-    private Double cokRate; // Tasa de descuento COK
-
-    // Linked Catalog IDs (Logical DDD links, not JPA DB associations)
-    @Column(name = "customer_id")
-    private Long customerId;
+    @Column(name = "client_id")
+    private Long clientId;
 
     @Column(name = "vehicle_id")
     private Long vehicleId;
@@ -95,20 +30,96 @@ public class Simulation {
     @Column(name = "financial_entity_id")
     private Long financialEntityId;
 
-    // Calculated Indicators
-    private Double loanAmount;
-    private Double tea;
-    private Double tem;
-    private Double tir;
-    private Double tcea;
-    private Double van;
+    @Column(name = "currency", length = 3)
+    private String currency = "PEN";
+
+    @Column(name = "vehicle_price", precision = 19, scale = 2)
+    private BigDecimal vehiclePrice;
+
+    @Column(name = "down_payment", precision = 19, scale = 2)
+    private BigDecimal downPayment;
+
+    @Column(name = "down_payment_percent", precision = 7, scale = 4)
+    private BigDecimal downPaymentPercent;
+
+    @Column(name = "financed_amount", precision = 19, scale = 2)
+    private BigDecimal financedAmount;
+
+    @Column(name = "term_months")
+    private Integer termMonths;
+
+    @Column(name = "tea_percent", precision = 12, scale = 7)
+    private BigDecimal teaPercent;
+
+    @Column(name = "tem_percent", precision = 12, scale = 7)
+    private BigDecimal temPercent;
+
+    @Column(name = "cok_tea_percent", precision = 12, scale = 7)
+    private BigDecimal cokTeaPercent;
+
+    @Column(name = "cok_tem_percent", precision = 12, scale = 7)
+    private BigDecimal cokTemPercent;
+
+    @Column(name = "payment_day")
+    private Integer paymentDay = 1;
+
+    @Column(name = "disbursement_date")
+    private LocalDate disbursementDate;
+
+    @Column(name = "first_payment_date")
+    private LocalDate firstPaymentDate;
+
+    @Column(name = "grace_type", length = 20)
+    private String graceType = "NONE";
+
+    @Column(name = "grace_months")
+    private Integer graceMonths = 0;
+
+    @Column(name = "balloon_enabled")
+    private Boolean balloonEnabled = false;
+
+    @Column(name = "balloon_percent", precision = 7, scale = 4)
+    private BigDecimal balloonPercent = BigDecimal.ZERO;
+
+    @Column(name = "balloon_amount", precision = 19, scale = 2)
+    private BigDecimal balloonAmount = BigDecimal.ZERO;
+
+    @Column(name = "credit_life_insurance_monthly_percent", precision = 12, scale = 7)
+    private BigDecimal creditLifeInsuranceMonthlyPercent = BigDecimal.ZERO;
+
+    @Column(name = "vehicle_insurance_annual_percent", precision = 12, scale = 7)
+    private BigDecimal vehicleInsuranceAnnualPercent = BigDecimal.ZERO;
+
+    @Column(name = "monthly_payment", precision = 19, scale = 2)
+    private BigDecimal monthlyPayment = BigDecimal.ZERO;
+
+    @Column(name = "van", precision = 19, scale = 2)
+    private BigDecimal van = BigDecimal.ZERO;
+
+    @Column(name = "tir_percent", precision = 12, scale = 7)
+    private BigDecimal tirPercent = BigDecimal.ZERO;
+
+    @Column(name = "tcea_percent", precision = 12, scale = 7)
+    private BigDecimal tceaPercent = BigDecimal.ZERO;
+
+    @Column(name = "total_interest", precision = 19, scale = 2)
+    private BigDecimal totalInterest = BigDecimal.ZERO;
+
+    @Column(name = "total_insurance", precision = 19, scale = 2)
+    private BigDecimal totalInsurance = BigDecimal.ZERO;
+
+    @Column(name = "total_fees", precision = 19, scale = 2)
+    private BigDecimal totalFees = BigDecimal.ZERO;
+
+    @Column(name = "total_payment", precision = 19, scale = 2)
+    private BigDecimal totalPayment = BigDecimal.ZERO;
+
+    @Column(length = 30)
+    private String status = "Guardado";
+
+    @Column(name = "archived", nullable = false)
+    private Boolean archived = false;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "simulation_grace_periods", joinColumns = @JoinColumn(name = "simulation_id"))
-    @Column(name = "grace_type")
-    @OrderColumn(name = "month_index")
-    private List<String> gracePeriods = new ArrayList<>(); // Month index 0 = Month 1 PG type ("T", "P", "S")
 }
