@@ -178,10 +178,12 @@ public class AuthService {
         }
 
         User user = userService.findUserByIdOrThrow(resetToken.getUserId());
-        userService.changePassword(user, request.getNewPassword());
+        // Mark the token as used before changePassword, which deletes every reset
+        // token of the user; saving afterwards merges a deleted entity and fails
         resetToken.setUsed(true);
         resetToken.setUsedAt(LocalDateTime.now());
         passwordResetTokenRepository.save(resetToken);
+        userService.changePassword(user, request.getNewPassword());
     }
 
     public void changePassword(String username, ChangePasswordRequest request) {
